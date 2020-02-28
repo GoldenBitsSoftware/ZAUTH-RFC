@@ -27,7 +27,7 @@ No. How does a low-cost, not Internet connect, lighting control device authentic
 
 ### Proposed change
 
-The goal of ZEBRA (Zephyr Bluetooth Authenticaiton), is to provide a simple, open source, 
+The goal of ZEBRA (Zephyr Bluetooth Authenticaiton), is to provide a simple, open source
 mechanism to add Bluetooth authentication for Zephyr based devices using the Zephyr 
 KConfig system.  Ease of use is critical. The developer can select an authentication method and the Bluetooth layer 
 (GATT or L2CAP), the necessary code is then included into the project. 
@@ -51,6 +51,8 @@ designed to handle multiple concurrent authentication processes, for example If 
 as a Central and Peripheral.  An example of the API used is shown in the following code snippet.
 
 ``` 
+static authenticate_conn central_auth_conn;
+
 void auth_status(struct authenticate_conn *auth_conn, auth_status_t status, void *context)
 {
     if(status == AUTH_STATUS_SUCCESSFUL) {
@@ -64,11 +66,10 @@ void auth_status(struct authenticate_conn *auth_conn, auth_status_t status, void
 void connected(struct bt_conn *conn, u8_t err) 
 {
    /* start authentication */
-   Central_auth_conn.conn = conn;
+   central_auth_conn.conn = conn;
    auth_svc_start(&central_auth_conn);
 }
 
-static authenticate_conn central_auth_conn;
 
 void main(void)
 {
@@ -79,7 +80,7 @@ void main(void)
 
     while(true) {
         k_yield();
-
+}
 ```
 
 ##### Authentication Bluetooth Service
@@ -87,7 +88,7 @@ void main(void)
 A new Bluetooth service is proposed, the Authentication service, would provide GATT based authentication.  It is 
 acknowledged that any official Bluetooth service must be approved by the Bluetooth SIG, ZEBRA is a step in this
  direction.  For Zephyr, the authentication code will reside in the Bluetooth subsystem along with other Bluetooth 
- services.  The intent is to make Bluetooth Authentication a common service, easily integrated, and readily adopted 
+ services in __subsys/bluetooth/services__.  The intent is to make Bluetooth Authentication a common service, easily integrated, and readily adopted 
  by developers.   The KConfig system will provide an interface to select and configure authentication.  An 
  example menu is show in the following link.
  [KCong Menu for Authentication](https://github.com/GoldenBitsSoftware/ZEBRA-RFC/blob/master/kconfig-menu.png)
@@ -123,7 +124,7 @@ authentication method with a mobile phone.  The mobile phone would need to suppo
  * DTLS. The TLS protocol is the gold standard of authentication and securing network communications.  DTLS is 
  part of the TLS protocol, but designed for IP datagrams which are lighter weight and ideal for resource constrained 
  devices.  Identities are verified using X.509 certificates and trusted root certificates.  The DTLS handshake 
- step are used for BLE authentication, a successful handshake means each side of the BLE connection has been 
+ steps are used for BLE authentication, a successful handshake means each side of the BLE connection has been 
  properly authenticated.  A result of the DTLS handshake steps is a shared secret key which is then used to 
  encrypted further communications.  For the BLE authentication this key is not used, instead the existing BLE 
  link layer encryption is used to encrypt BLE communications.  However _**Why not use this shared key for BLE 
@@ -146,7 +147,7 @@ signing and encryption at the application layer.
 
 **Man In The Middle Attacks (MITM):**
 The Bluetooth specification does provide for MITM protection via Secure Simple Pairing (Bluetooth Version 5, 
-Vol 1, Part A, Section 5.2.3), however it requires a human to perform Secure Simple Pairing either Numeric 
+Vol 1, Part A, Section 5.2.3), however it requires a human to perform Secure Simple Pairing, either Numeric 
 comparison or passkey.  For IoT devices, requiring human intervention is not feasible due to the large numbers
 of devices installed, potential errors, and labor costs. For the DTLS  authentication, the shared key 
 created during the DTLS handshake can be used to either sign and/or encrypt the application data.  For the 
@@ -158,8 +159,8 @@ message payload, encryption would be done using AES-128/256
 
 ### Dependencies
 
-_Highlight how the change may affect the rest of the project (new components,
-modifications in other areas), or other teams/projects._
+(_Highlight how the change may affect the rest of the project (new components,
+modifications in other areas), or other teams/projects._)
 
 **TODO!!**
 
