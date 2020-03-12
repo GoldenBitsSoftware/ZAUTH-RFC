@@ -41,6 +41,8 @@ level versus the stack itself.  This has both advantages and disadvantages, disc
 
 
 The ZEBRA design consists of an API layer, KConfig interface, and the underlying authentication methods.  
+>An initial implementation can be found here: https://github.com/GoldenBitsSoftware/zephyr    see: `feature/ble_authentication` branch.  BLE Authentication source files are located here:  subsystem/bluetooth/services/auth_*.c.  Sample source files are located here: samples/bluetooth/authenticated_connection
+
 
 ##### Authentication API
 
@@ -155,7 +157,14 @@ Challenge-Response authentication method, the shared key along with  unique sess
 from the challenge nonces) would be use dot sign and/or  encrypt. Signing would be done using a HMAC of the 
 message payload, encryption would be done using AES-128/256
 
- 
+**Reconnecting:**
+ Similar to BLE link layer reconnecting after two devices are bonded, a similar mechanism is needed for an 
+ application layer reconnect after secure authentcation.  Maybe ==> challege response with shared key? Conditions:
+ 1) If the MA (mobile app) doesn't have the key in memory it initiates a DTLS.
+ 2) If the MA does have a key, then a simple challenge-response with the device.  Use the key as part of a hash with a random nonce and challenge. If either the MA or device fails the challenge-response, start a DTLS handshake.
+ 3) If the device reboots and does not have a key, the challenge-response will fail.  Start DTLS.
+ 4) If the device detects a different MA is connecting, force a DTLS.  This may happen anyway when the challenge-response fails.
+ 5) After two days (or some other time period), the MA or device (if the device can tell time) will force a new DTLS.
 
 ### Dependencies
 
@@ -199,7 +208,7 @@ there is no capability to identify the remote peer.
 
 #### GATT Authentication
 GATT Authentication defined in the Bluetooth spec (Version 5, Vol 3, Part G, Section 8.1) is used to 
-eanble a per characteristic authentication using a shared key.  It does not authenticate a Bluetooth 
+enable a per characteristic authentication using a shared key.  It does not authenticate a Bluetooth 
 peer (Central or Peripheral).
 
 
