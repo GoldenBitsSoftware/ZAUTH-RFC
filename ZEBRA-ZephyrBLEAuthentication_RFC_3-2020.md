@@ -1,6 +1,8 @@
 
 # ZEBRA - Zephyr Bluetooth Authentication
 
+March 2020
+
 Bluetooth has become the defacto standard for connecting devices over short distances.  Everything from 
 clocks, speakers, cars, to small low power IoT devices use Bluetooth Low Energy (BLE).  BLE 
 is by far the most popular choice for configuring and managing IoT devices.  Bluetooth’s 
