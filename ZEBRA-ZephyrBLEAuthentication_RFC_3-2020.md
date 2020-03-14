@@ -1,8 +1,8 @@
 
-# ZEBRA - Zephyr Bluetooth Authentication DRAFT
+# ZEBRA - Zephyr Bluetooth Authentication
 
 Bluetooth has become the defacto standard for connecting devices over short distances.  Everything from 
-clocks, speakers, cars, to small low power IoT devices using Bluetooth Low Energy (BLE).  BLE 
+clocks, speakers, cars, to small low power IoT devices use Bluetooth Low Energy (BLE).  BLE 
 is by far the most popular choice for configuring and managing IoT devices.  Bluetooth’s 
 popularity has also made it an attractive hacking target.
 
@@ -21,7 +21,7 @@ IoT devices do not have a screen or the expectation of a human in the loop.
 it a mobile application or another IoT device.  The design of Bluetooth is intended to allow 
 interoperability between devices, however for many devices this is unacceptable.  Should a 
 Bluetooth enabled glucose monitoring system allow any mobile application to connect? 
-No. How does a low-cost, not Internet connect, lighting control device authenticate a mobile 
+No. How does a low-cost, not Internet connected, lighting control device authenticate a mobile 
  application connecting via Bluetooth?  
 
 
@@ -33,7 +33,7 @@ KConfig system.  Ease of use is critical. The developer can select an authentica
 (GATT or L2CAP), the necessary code is then included into the project. 
 
 Initially two authentication methods are proposed, DTLS and Challenge-Response.  Additional
-authentication methods can be added including custom authentication.  For example, a RSA hardware 
+authentication methods can be added including custom authentication such as a RSA hardware 
 token based authentication method.  The authentication is performed at the Bluetooth application 
 level versus the stack itself.  This has both advantages and disadvantages, discussed later in this proposal.
 
@@ -82,6 +82,7 @@ void main(void)
 
     while(true) {
         k_yield();
+    }
 }
 ```
 
@@ -128,11 +129,10 @@ authentication method with a mobile phone.  The mobile phone would need to suppo
  devices.  Identities are verified using X.509 certificates and trusted root certificates.  The DTLS handshake 
  steps are used for BLE authentication, a successful handshake means each side of the BLE connection has been 
  properly authenticated.  A result of the DTLS handshake steps is a shared secret key which is then used to 
- encrypted further communications.  For the BLE authentication this key is not used, instead the existing BLE 
- link layer encryption is used to encrypt BLE communications.  However _**Why not use this shared key for BLE 
+ encrypted further communications.  For the BLE authentication this key is not used, however it can be used for application level security (see MITM below).  However _**Why not use this shared key for BLE 
  link layer encryption?   Why not set this key into the Zephyr Bluetooth stack after the DTLS handshake?**_ This would 
  enable different key creation possibilities with various ECC curves and RSA keys.  Future versions of ZEBRA 
- should support this capability.  The Mbed TLS stack is used for the DTLS authentication in ZEBRA.
+ should support this capability. The Mbed TLS stack is used for the DTLS authentication in ZEBRA.
  
  * Challenge-Response. A simple Challenge-Response authentication method is an alternative lighter weight 
  approach to authentication.  This method uses a shared key and a random nonce. Each side exchanges SHA256 
@@ -159,12 +159,12 @@ message payload, encryption would be done using AES-128/256
 
 **Reconnecting:**
  Similar to BLE link layer reconnecting after two devices are bonded, a similar mechanism is needed for an 
- application layer reconnect after secure authentcation.  Maybe ==> challege response with shared key? Conditions:
- 1) If the MA (mobile app) doesn't have the key in memory it initiates a DTLS.
- 2) If the MA does have a key, then a simple challenge-response with the device.  Use the key as part of a hash with a random nonce and challenge. If either the MA or device fails the challenge-response, start a DTLS handshake.
- 3) If the device reboots and does not have a key, the challenge-response will fail.  Start DTLS.
- 4) If the device detects a different MA is connecting, force a DTLS.  This may happen anyway when the challenge-response fails.
- 5) After two days (or some other time period), the MA or device (if the device can tell time) will force a new DTLS.
+ application layer reconnect after secure authentcation.  A simple challege-response exchange using the exsiting shared key is proposed. Conditions:
+ 1) If the central (client) doesn't have the key in memory it initiates an authentication method (DTLS or Challenge-Response).
+ 2) If the central does have a key, then a simple challenge-response with the device.  Use the key as part of a hash with a random nonce and challenge. If either the central or peripheral fails the challenge-response, the central starts an authentication method.
+ 3) If the device reboots and does not have a key, the challenge-response will fail.  An authenticaiton method is started.
+ 4) If the peripheral detects a different central is connecting, force an authentication method.  This may happen anyway when the reconnect challenge-response fails.
+ 5) After two days (or some other time period), the central or peripheral will force a new authentication.
 
 ### Dependencies
 
@@ -210,5 +210,6 @@ there is no capability to identify the remote peer.
 GATT Authentication defined in the Bluetooth spec (Version 5, Vol 3, Part G, Section 8.1) is used to 
 enable a per characteristic authentication using a shared key.  It does not authenticate a Bluetooth 
 peer (Central or Peripheral).
+
 
 
