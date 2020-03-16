@@ -213,5 +213,8 @@ GATT Authentication defined in the Bluetooth spec (Version 5, Vol 3, Part G, Sec
 enable a per characteristic authentication using a shared key.  It does not authenticate a Bluetooth 
 peer (Central or Peripheral).
 
+#### Google Fast Pair Service   (GFPS)
+This is a pairing method developed by Google to quickly pair consumer devices with and a phone and user’s account. See: https://developers.google.com/nearby/fast-pair/spec, for details.  It is part of Google’s Nearby platform (see:  https://developers.google.com/nearby).  Authentication is accomplished by pre-shared keys provide by Google after registering your device (the thing you’re developing) with Google.  While GFPS provides a great user experience, it has several drawbacks, specifically: a) requires a mobile phone, b) requires Google approval for your device,  and c) licensing may not be consistent with Zephyr.  GFPS would better fit as one of the possible authentication methods in ZEBRA.
+
 
 
